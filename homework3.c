@@ -2,6 +2,8 @@
 #include "homework3.h"
 #include "myGPIO.h"
 #include "myTimer.h"
+#define PRESSED       0X00
+#define UNPRESSED     0X01
 
 int main(void)
 {
@@ -10,6 +12,7 @@ int main(void)
     unsigned int count1 = 0;
 
     // TODO: Declare the variables that main uses to interact with your state machine.
+    unsigned char buttonhistory = UNPRESSED;
 
 
     // Stops the Watchdog timer.
@@ -35,17 +38,26 @@ int main(void)
 
         // TODO: If Timer0 has expired, increment count0.
         // YOU MUST WRITE timer0expired IN myTimer.c
-
+        if(timer0Expired()) {
+            count0++;
+        }
 
 
         // TODO: If Timer1 has expired, update the button history from the pushbutton value.
         // YOU MUST WRITE timer1expired IN myTimer.c
+        if(timer1Expired()) {
+            buttonhistory=buttonhistory<<1;
+            buttonhistory |=  checkStatus_BoosterpackS1();
+            //The most recent status of button press of S1 is now in LSB.
+            //count1++;
+        }
 
 
 
         // TODO: Call the button state machine function to check for a completed, debounced button press.
         // YOU MUST WRITE THIS FUNCTION BELOW.
-
+        if(fsmBoosterpackButtonS1(buttonhistory))
+            count1++;
 
 
         // TODO: If a completed, debounced button press has occurred, increment count1.
@@ -65,6 +77,30 @@ void initBoard()
 void changeLaunchpadLED2(unsigned int count)
 {
 
+    int i = count%4;
+    if(i==0) { //Switch on Red
+        turnOn_LaunchpadLED2Red();
+        turnOff_LaunchpadLED2Blue();
+        turnOff_LaunchpadLED2Green();
+
+    }
+    else if(i==1) {
+        turnOff_LaunchpadLED2Red();
+        turnOn_LaunchpadLED2Blue();
+        turnOff_LaunchpadLED2Green();
+
+    }
+    else if(i==2) {
+        turnOff_LaunchpadLED2Red();
+        turnOff_LaunchpadLED2Blue();
+        turnOn_LaunchpadLED2Green();
+
+    }
+    else if(i==3){
+        turnOff_LaunchpadLED2Red();
+        turnOff_LaunchpadLED2Blue();
+        turnOff_LaunchpadLED2Green();
+    }
 }
 
 // TODO: Maybe the value of a count variable to a color for the Boosterpack LED
@@ -72,6 +108,39 @@ void changeLaunchpadLED2(unsigned int count)
 void changeBoosterpackLED(unsigned int count)
 {
 
+    void turnOn_BoosterpackLEDRed();
+    void turnOff_BoosterpackLEDRed();
+    void turnOn_BoosterpackLEDGreen();
+    void turnOff_BoosterpackLEDGreen();
+    void turnOn_BoosterpackLEDBlue();
+    void turnOff_BoosterpackLEDBlue();
+
+
+
+    int i = count%4;
+    if(i==0) { //Switch on Red
+        turnOn_BoosterpackLEDRed();
+        turnOff_BoosterpackLEDGreen();
+        turnOff_BoosterpackLEDBlue();
+
+    }
+    else if(i==1) {
+        turnOff_BoosterpackLEDRed();
+        turnOn_BoosterpackLEDGreen();
+        turnOff_BoosterpackLEDBlue();
+
+    }
+    else if(i==2) {
+        turnOff_BoosterpackLEDRed();
+        turnOff_BoosterpackLEDGreen();
+        turnOn_BoosterpackLEDBlue();
+    }
+
+    else if(i==3) {
+        turnOff_BoosterpackLEDRed();
+        turnOff_BoosterpackLEDGreen();
+        turnOff_BoosterpackLEDBlue();
+    }
 }
 
 // TODO: Create a button state machine.
@@ -79,7 +148,10 @@ void changeBoosterpackLED(unsigned int count)
 bool fsmBoosterpackButtonS1(unsigned int buttonhistory)
 {
     bool pressed = false;
-
+    if(buttonhistory==PRESSED) {
+        //If all last eight inputs returned PRESSED, that means the button was pressed.
+        pressed=true;
+    }
 
     return pressed;
 }
